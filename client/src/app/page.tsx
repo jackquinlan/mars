@@ -1,7 +1,12 @@
 import * as React from "react";
 
-export default function Home() {
+import { getBaseUrl } from "@/lib/utils";
+
+export default async function Home() {
+  let data = await fetch(`${getBaseUrl()}/api/chess/get-move`)
+    .then((res) => res.json());
+
   return (
-    <div>Home</div>
+    <div>{data.message}</div>
   );
 }
