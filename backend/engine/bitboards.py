@@ -5,13 +5,11 @@ class Bitboard:
   """
   A bitboard is a 64-bit integer representing the state of a chessboard. In this case, for a specific piece-type color combination
   A one-bit represents an occupied square, while a zero-bit represents an unoccupied square. 
-  
-  Uses little endian represetation which maps: Rank 1 .. Rank 8 -> 0..7 and A-File .. H-File -> 0..7
   """
   def __init__(self,
-               bb: np.int64):
-    assert isinstance(bb, np.int64), "Value must be of type int64"
-    self.bb = bb
+               bb: np.uint64):
+    assert isinstance(bb, np.uint64), "Value must be of type int64"
+    self.bb: np.uint64 = bb
 
   @property
   def is_empty(self): return self.bb == 0
@@ -43,7 +41,8 @@ class Bitboard:
     self.bb & (1 << square) = 1010 & 1000 = 992 (which is non-zero)
     """
     assert 0 <= square < 64, "Square must be between 0 and 63"
-    return (self.bb & (1 << square)) != 0
+    mask = (1 << square)
+    return (mask & self.bb) != 0
 
   def clr_bit(self, square: int) -> None:
     """
@@ -56,11 +55,19 @@ class Bitboard:
     self.bb & ~(1 << square) = 1010 & 0111 = 0010
     """
     assert 0 <= square < 64, "Square must be between 0 and 63"
-    self.bb &= ~(1 << square)
+    mask = (1 << square)
+    self.bb &= ~mask
 
   def pprint(self):
     """
-    Pretty print the bitboard into an 8x8 grid
+    Pretty print the bitboard into an 8x8 grid using little-endian approach to enumerating files and ranks. 
+    Used for debugging.
+
+    Rank 1 .. Rank 8 -> 0..7 and A-File .. H-File -> 0..7
     """
-    # TODO
-    return 
+    binary = "{0:b}".format(self.bb).zfill(64)
+    for i in range(8):
+      row = list(reversed(binary[i * 8:(i + 1) * 8]))
+      print(" ".join(row))
+
+
