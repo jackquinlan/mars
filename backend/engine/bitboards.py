@@ -44,20 +44,6 @@ class Bitboard:
     mask = (1 << square)
     return (mask & self.bb) != 0
 
-  def clr_bit(self, square: int) -> None:
-    """
-    mask = ~(1 << square) = 1{#0's = square}
-    ~ operator flips all bits in the bitboard: 1000 becomes 0111 
-
-    example:
-    (1 << 2) = 1000
-    self.bb  = 1010
-    self.bb & ~(1 << square) = 1010 & 0111 = 0010
-    """
-    assert 0 <= square < 64, "Square must be between 0 and 63"
-    mask = (1 << square)
-    self.bb &= ~mask
-
   def pprint(self):
     """
     Pretty print the bitboard into an 8x8 grid using little-endian approach to enumerating files and ranks. 
