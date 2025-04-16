@@ -28,17 +28,17 @@ class Bitboard:
                 
     def __eq__(self, other):
         assert isinstance(other, Bitboard), "Must be Bitboard type"
-        return self.board == other
+        return self.board == other.board
 
     def __or__(self, other):
         assert isinstance(other, Bitboard), "Must be Bitboard type"
-        return Bitboard(self.board | other)
+        return Bitboard(self.board | other.board)
 
     def __xor__(self, other):
         assert isinstance(other, Bitboard), "Must be Bitboard type"
-        return Bitboard(self.board ^ other)
+        return Bitboard(self.board ^ other.board)
 
     def __and__(self, other):
         assert isinstance(other, Bitboard), "Must be Bitboard type"
-        return Bitboard(self.board & other)
+        return Bitboard(self.board & other.board)
 

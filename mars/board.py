@@ -1,15 +1,36 @@
 import numpy as np
 from mars.bitboard import Bitboard
 
-VALID_PIECES = ['p', 'n', 'b', 'r', 'q', 'k', # black pieces
-                'P', 'N', 'B', 'R', 'Q', 'K'] # white pieces
+VALID_PIECES = ["p", "n", "b", "r", "q", "k", # black pieces
+                "P", "N", "B", "R", "Q", "K"] # white pieces
 
 
 class Board:
     def __init__(self, fen: str): 
-        self.bitboards = self.load_from_fen(fen)
+        self.bitboards = self._load_from_fen(fen)
+
+    def occupied(self):
+        oc = Bitboard(0)
+        for bb in self.bitboards:
+            oc |= self.bitboards[bb]
+        return oc 
     
-    def load_from_fen(self, board: str) -> dict[str, Bitboard]:
+    def occupied_by_color(self, color: str):
+        assert color in ["w", "b"], "Invalid color"
+        # White pieces are represented by uppercase characters
+        pieces = ["P", "N", "B", "R", "Q", "K"] if color == "w" else \
+                 ["p", "n", "b", "r", "q", "k"]
+        oc = Bitboard(0)
+        for bb in self.bitboards:
+            if bb in pieces: 
+                oc |= self.bitboards[bb]
+        return oc
+    
+    def piece_bitboard(self, piece: str):
+        assert piece in VALID_PIECES, "Invalid piece"
+        return self.bitboards[piece]
+
+    def _load_from_fen(self, board: str) -> dict[str, Bitboard]:
         # Example input: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
         bitboards = {
             p: Bitboard(0) for p in VALID_PIECES
