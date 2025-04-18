@@ -1,8 +1,8 @@
 import numpy as np
 from mars.bitboard import Bitboard
 
-VALID_PIECES = ["p", "n", "b", "r", "q", "k", # black pieces
-                "P", "N", "B", "R", "Q", "K"] # white pieces
+VALID_PIECES=["p", "n", "b", "r", "q", "k", # black pieces
+              "P", "N", "B", "R", "Q", "K"] # white pieces
 
 
 class Board:
@@ -25,6 +25,9 @@ class Board:
             if bb in pieces: 
                 oc |= self.bitboards[bb]
         return oc
+
+    def empty(self):
+        return Bitboard(~self.occupied().board) & Bitboard(0xFFFFFFFFFFFFFFFF)
     
     def piece_bitboard(self, piece: str):
         assert piece in VALID_PIECES, "Invalid piece"

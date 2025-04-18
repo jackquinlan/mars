@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from mars.board  import Board
 
-DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+DEFAULT_FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 
 @dataclass
@@ -16,6 +16,7 @@ class Position:
     @classmethod
     def load_from_fen(cls, fen: str=DEFAULT_FEN):
         fen_parts = fen.split(" ")
+        assert len(fen_parts) == 6, "Fen string must contain 6 parts"
         return cls(
             board=Board(fen=fen_parts[0]),
             color=fen_parts[1],
