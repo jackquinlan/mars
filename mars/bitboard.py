@@ -3,9 +3,9 @@ from mars.constants import A_FILE, H_FILE
 
 
 class Bitboard:
-    def __init__(self, board: np.uint64):
+    def __init__(self, board: np.uint64|np.int64|int):
         # Force np.uint64 type to avoid future casting issues
-        self.board = board if isinstance(board, np.uint64) else np.uint64(board)
+        self.board = board if type(board) == np.uint64 else np.uint64(board)
     
     def __eq__(self, other):
         assert isinstance(other, Bitboard), "Must be Bitboard type"
@@ -27,7 +27,7 @@ class Bitboard:
     def is_empty(self):
         return self.board == 0
 
-    def get_bit(self, square: int) -> bool:
+    def get_bit(self, square: int) -> np.bool:
         assert 0 <= square < 64, "Square must be 0-63"
         # True if 1, False if 0
         return ((1 << square) & self.board) > 0
