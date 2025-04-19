@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from mars.board  import Board
-
-DEFAULT_FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+from mars.board import Board
+from mars import DEFAULT_FEN
 
 
 @dataclass
@@ -25,4 +24,8 @@ class Position:
             halfmove_clock=int(fen_parts[4]),
             fullmove_count=int(fen_parts[5]),
         )
+    
+    def checking_pieces(self):
+        # Return the pieces that have the king in check
+        return
 

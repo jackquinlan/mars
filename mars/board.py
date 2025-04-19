@@ -1,8 +1,6 @@
 import numpy as np
 from mars.bitboard import Bitboard
-
-VALID_PIECES=["p", "n", "b", "r", "q", "k", # black pieces
-              "P", "N", "B", "R", "Q", "K"] # white pieces
+from mars import VALID_PIECES
 
 
 class Board:
