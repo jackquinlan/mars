@@ -48,3 +48,8 @@ class Board:
             idx -= 16 # reset index to next rank
         return bitboards
     
+    @property
+    def to_fen(self):
+        fen = ""
+        return fen
+    

@@ -4,7 +4,7 @@ from typing import Optional
 from mars.bitboard import Bitboard
 from mars.position import Position
 from mars.utils import get_squares_from_bitboard, algebraic_to_square_index
-from mars import RANK_1, RANK_4, RANK_5, RANK_8, PROMO_PIECES, SQUARES, VALID_COLORS, A_FILE, H_FILE
+from mars import RANK_1, RANK_4, RANK_5, RANK_8, PROMO_PIECES, SQUARES, VALID_COLORS, A_FILE, B_FILE, G_FILE, H_FILE
 
 
 @dataclass(frozen=True)
@@ -30,10 +30,14 @@ class MoveGen:
     attack_sets: dict[str, dict[str, dict[int, Bitboard]]]
     def __init__(self):
         self.attack_sets = self.generate_attack_sets()
+        self.attack_sets["w"]["n"][27].pprint()
     
     def pseudo_legal_moves(self, position: Position) -> list[Move]:
         move_list = []
+
         pawn_list = self.pawn_moves(position)
+        knight_list = self.knight_moves(position)
+        bishop_list = self.bishop_moves(position)
 
         move_list.extend(pawn_list)
         return move_list
@@ -87,12 +91,31 @@ class MoveGen:
                     moves.append(Move(start=square, end=en_passant_index, en_passant=True))
 
         return moves
+
+    def knight_moves(self, position: Position) -> list[Move]:
+        moves: list[Move] = []
+        board = position.board
+        color = position.color
+        
+        p = board.occupied_by_color(color)
+        e = board.occupied_by_color(position.opponent)
+        
+        
+        return moves 
+
+    def bishop_moves(self, position: Position) -> list[Move]:
+        moves: list[Move] = []
+        board = position.board
+        color = position.color
+
+        return moves
     
     def generate_attack_sets(self) -> dict[str, dict[str, dict[int, Bitboard]]]:
         attack = {}
         for c in VALID_COLORS:
             attack[c] = {}
             attack[c]["p"] = self.pawn_attack_sets(color=c)
+            attack[c]["n"] = self.knight_attack_sets()
         return attack
     
     def pawn_attack_sets(self, color: str) -> dict[int, Bitboard]:
@@ -105,6 +128,21 @@ class MoveGen:
                 pawn_attack[s] = Bitboard(((b >> 7) & ~A_FILE) | ((b >> 9) & ~H_FILE))
         return pawn_attack
 
+    def knight_attack_sets(self):
+        knight_attack = {}
+        for s in range(0, 63):
+            b = np.uint64(1 << s)
+            knight_attack[s] = Bitboard(
+                (b << 17) & (~A_FILE)           |
+                (b << 10) & (~A_FILE & ~B_FILE) |
+                (b << 15) & (~H_FILE)           |
+                (b << 6)  & (~G_FILE & ~H_FILE) |
+                (b >> 10) & (~G_FILE & ~H_FILE) |
+                (b >> 17) & (~H_FILE)           |
+                (b >> 15) & (~A_FILE)           |
+                (b >> 6)  & (~A_FILE & ~B_FILE)
+            )
+        return knight_attack
 
 
 
