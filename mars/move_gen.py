@@ -30,7 +30,6 @@ class MoveGen:
     attack_sets: dict[str, dict[str, dict[int, Bitboard]]]
     def __init__(self):
         self.attack_sets = self.generate_attack_sets()
-        self.attack_sets["w"]["n"][27].pprint()
     
     def pseudo_legal_moves(self, position: Position) -> list[Move]:
         move_list = []
@@ -40,6 +39,7 @@ class MoveGen:
         bishop_list = self.bishop_moves(position)
 
         move_list.extend(pawn_list)
+        move_list.extend(knight_list)
         return move_list
 
     def pawn_moves(self, position: Position) -> list[Move]:
@@ -97,10 +97,19 @@ class MoveGen:
         board = position.board
         color = position.color
         
-        p = board.occupied_by_color(color)
-        e = board.occupied_by_color(position.opponent)
-        
-        
+        player = board.occupied_by_color(color)
+        enemy  = board.occupied_by_color(position.opponent)
+        player_knights = board.piece_bitboard("N" if color == "w" else "n")
+        for square in get_squares_from_bitboard(player_knights):
+            attack = self.attack_sets[color]["n"][square]
+            for end in get_squares_from_bitboard(attack):
+                if player.get_bit(end): 
+                    # Can't move here because a friendly piece is present
+                    continue
+                if not enemy.get_bit(end):
+                    moves.append(Move(start=square, end=end))
+                else:
+                    moves.append(Move(start=square, end=end, capture=True))
         return moves 
 
     def bishop_moves(self, position: Position) -> list[Move]:
