@@ -35,11 +35,13 @@ class MoveGen:
         move_list = []
 
         pawn_list = self.pawn_moves(position)
+        # TODO: Maybe combine the knight and king (and other pieces??) into a generic move function with a position, piece_code, and color 
         king_list = self.king_moves(position)
         knight_list = self.knight_moves(position)
         bishop_list = self.bishop_moves(position)
 
         move_list.extend(pawn_list)
+        move_list.extend(king_list)
         move_list.extend(knight_list)
         return move_list
 
@@ -125,8 +127,19 @@ class MoveGen:
         board = position.board
         color = position.color
 
+        player = board.occupied_by_color(color)
+        enemy  = board.occupied_by_color(position.opponent)
         player_king = board.piece_bitboard("K" if color == "w" else "k")
-
+        for square in get_squares_from_bitboard(player_king):
+            attack = self.attack_sets[color]["k"][square]
+            for end in get_squares_from_bitboard(attack):
+                if player.get_bit(end): 
+                    # Can't move here because a friendly piece is present
+                    continue
+                if not enemy.get_bit(end):
+                    moves.append(Move(start=square, end=end))
+                else:
+                    moves.append(Move(start=square, end=end, capture=True))
         return moves
     
     def generate_attack_sets(self) -> dict[str, dict[str, dict[int, Bitboard]]]:
