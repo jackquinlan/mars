@@ -10,8 +10,6 @@ class Game:
 
     def loop(self):
         moves = self.move_gen.pseudo_legal_moves(position=self.position)
-        print(len(moves), " moves")
-        for move in moves:
-            print(move.to_algebraic(), move.capture, move.en_passant, move.promotion)
+        print(len(moves), " pseudo legal moves")
         return
 

@@ -9,8 +9,28 @@ class Board:
 
     @property
     def to_fen(self):
-        fen = ""
-        return fen
+        fen_rows = []
+        for rank in range(7, -1, -1):
+            row = ""
+            cnt = 0
+            for file in range(0, 8):
+                square = (rank * 8) + file
+                square_occupied = False
+                for p, bb in self.bitboards.items():
+                    if bb.get_bit(square): 
+                        square_occupied = True
+                        if cnt > 0:
+                            row += f"{cnt}"
+                        row += f"{p}"
+                        cnt = 0
+                        break
+                if not square_occupied:
+                    cnt += 1
+            if cnt > 0:
+                row += f"{cnt}"
+            fen_rows.append(row)
+        # Join ranks together
+        return "/".join(fen_rows)
 
     def occupied(self):
         oc = Bitboard(0)

@@ -1,5 +1,5 @@
 import numpy as np
-from mars.constants import A_FILE, H_FILE
+from mars import A_FILE, H_FILE
 
 
 class Bitboard:

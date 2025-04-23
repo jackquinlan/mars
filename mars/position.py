@@ -27,8 +27,22 @@ class Position:
         )
     
     @property
+    def to_fen(self):
+        return " ".join([
+            self.board.to_fen,
+            self.color,
+            self.castling_rights,
+            self.en_passant if self.en_passant != None else "-",
+            str(self.halfmove_clock),
+            str(self.fullmove_count)
+        ])
+
+    @property
     def opponent(self):
         return "w" if self.color == "b" else "b"
+    
+    def make_move(self):
+        return
 
     def checking_pieces(self):
         # Return the pieces that have the king in check
