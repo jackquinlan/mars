@@ -35,6 +35,7 @@ class MoveGen:
         move_list = []
 
         pawn_list = self.pawn_moves(position)
+        king_list = self.king_moves(position)
         knight_list = self.knight_moves(position)
         bishop_list = self.bishop_moves(position)
 
@@ -118,12 +119,23 @@ class MoveGen:
         color = position.color
 
         return moves
+
+    def king_moves(self, position: Position) -> list[Move]:
+        moves: list[Move] = []
+        board = position.board
+        color = position.color
+
+        player_king = board.piece_bitboard("K" if color == "w" else "k")
+
+        return moves
     
     def generate_attack_sets(self) -> dict[str, dict[str, dict[int, Bitboard]]]:
         attack = {}
         for c in VALID_COLORS:
             attack[c] = {}
             attack[c]["p"] = self.pawn_attack_sets(color=c)
+            # TODO: Might not need an attack set per color for these
+            attack[c]["k"] = self.king_attack_sets()
             attack[c]["n"] = self.knight_attack_sets()
         return attack
     
@@ -137,9 +149,9 @@ class MoveGen:
                 pawn_attack[s] = Bitboard(((b >> 7) & ~A_FILE) | ((b >> 9) & ~H_FILE))
         return pawn_attack
 
-    def knight_attack_sets(self):
+    def knight_attack_sets(self) -> dict[int, Bitboard]:
         knight_attack = {}
-        for s in range(0, 63):
+        for s in range(0, 64):
             b = np.uint64(1 << s)
             knight_attack[s] = Bitboard(
                 (b << 17) & (~A_FILE)           |
@@ -152,52 +164,20 @@ class MoveGen:
                 (b >> 6)  & (~A_FILE & ~B_FILE)
             )
         return knight_attack
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
+    def king_attack_sets(self) -> dict[int, Bitboard]:
+        king_attack = {}
+        for s in range(0, 64):
+            b = np.uint64(1 << s)
+            king_attack[s] = Bitboard(
+                (b << 8) |
+                (b >> 8) | 
+                (b << 1) & (~A_FILE) |
+                (b >> 1) & (~H_FILE) |
+                (b >> 9) & (~H_FILE) |
+                (b << 9) & (~A_FILE) |
+                (b >> 7) & (~A_FILE) |
+                (b << 7) & (~H_FILE)
+            )
+        return king_attack
 

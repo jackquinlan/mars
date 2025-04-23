@@ -7,6 +7,11 @@ class Board:
     def __init__(self, fen: str): 
         self.bitboards = self._load_from_fen(fen)
 
+    @property
+    def to_fen(self):
+        fen = ""
+        return fen
+
     def occupied(self):
         oc = Bitboard(0)
         for bb in self.bitboards:
@@ -47,9 +52,4 @@ class Board:
                     idx += 1
             idx -= 16 # reset index to next rank
         return bitboards
-    
-    @property
-    def to_fen(self):
-        fen = ""
-        return fen
     
