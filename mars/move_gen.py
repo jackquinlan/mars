@@ -20,25 +20,22 @@ class Move:
     en_passant: bool = False
     
     def to_algebraic(self):
-        # Return the Move in algebraic notation
-        alg = f"{SQUARES[self.start]}{SQUARES[self.end]}".lower()
-        return alg 
+        return f"{SQUARES[self.start]}{SQUARES[self.end]}".lower()
 
 class MoveGen:
 
     # { color: { piece: { square: Bitboard } } }
     attack_sets: dict[str, dict[str, dict[int, Bitboard]]]
     def __init__(self):
-        self.attack_sets = self.generate_attack_sets()
+        self.attack_sets = self.init_attack_sets()
     
     def pseudo_legal_moves(self, position: Position) -> list[Move]:
         move_list = []
 
-        pawn_list = self.pawn_moves(position)
         # TODO: Maybe combine the knight and king (and other pieces??) into a generic move function with a position, piece_code, and color 
+        pawn_list = self.pawn_moves(position)
         king_list = self.king_moves(position)
         knight_list = self.knight_moves(position)
-        bishop_list = self.bishop_moves(position)
 
         move_list.extend(pawn_list)
         move_list.extend(king_list)
@@ -115,13 +112,6 @@ class MoveGen:
                     moves.append(Move(start=square, end=end, capture=True))
         return moves 
 
-    def bishop_moves(self, position: Position) -> list[Move]:
-        moves: list[Move] = []
-        board = position.board
-        color = position.color
-
-        return moves
-
     def king_moves(self, position: Position) -> list[Move]:
         moves: list[Move] = []
         board = position.board
@@ -142,7 +132,7 @@ class MoveGen:
                     moves.append(Move(start=square, end=end, capture=True))
         return moves
     
-    def generate_attack_sets(self) -> dict[str, dict[str, dict[int, Bitboard]]]:
+    def init_attack_sets(self) -> dict[str, dict[str, dict[int, Bitboard]]]:
         attack = {}
         for c in VALID_COLORS:
             attack[c] = {}

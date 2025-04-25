@@ -45,6 +45,5 @@ class Position:
         return
 
     def checking_pieces(self):
-        # Return the pieces that have the king in check
         return
 

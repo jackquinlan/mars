@@ -1,4 +1,3 @@
-import numpy as np
 from mars.bitboard import Bitboard
 from mars import VALID_PIECES
 
