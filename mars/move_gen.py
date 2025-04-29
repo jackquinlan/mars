@@ -20,34 +20,30 @@ class Move:
     en_passant: bool = False
     
     def to_algebraic(self):
+        # TODO: Finish
         return f"{SQUARES[self.start]}{SQUARES[self.end]}".lower()
 
 class MoveGen:
 
-    # { color: { square: Bitboard } }
-    pawn_attacks: dict[str, dict[int, Bitboard]]
-    # { piece: { square: Bitboard } } <-- for knights and kings
-    piece_attack_sets: dict[str, dict[int, Bitboard]]
+    piece_attack_sets: dict[str, dict[int, Bitboard]] # { piece: { square: Bitboard } }
+    pawn_attacks: dict[str, dict[int, Bitboard]]      # { color: { square: Bitboard } }
 
     def __init__(self):
         self.pawn_attacks = self._init_pawn_attack_sets()
         self.piece_attack_sets = self._init_attack_sets()
+
+        self.piece_attack_sets["r"][1].pprint()
     
     def pseudo_legal_moves(self, position: Position) -> list[Move]:
         move_list = []
 
-        # TODO: Maybe combine the knight and king (and other pieces??) into a generic move function with a position, piece_code, and color 
         # Moves that only depend on origin square
-        pawn_list = self.pawn_moves(position)
-        king_list = self.king_moves(position)
-        knight_list = self.knight_moves(position)
+        move_list.extend(self.pawn_moves(position))
+        move_list.extend(self.king_moves(position))
+        move_list.extend(self.knight_moves(position))
         # Moves that depend on origin square & "blockers" (bishops + rooks)
-            
         # Queen moves are calculated as the intersection of rook + bishop moves
 
-        move_list.extend(pawn_list)
-        move_list.extend(king_list)
-        move_list.extend(knight_list)
         return move_list
 
     def pawn_moves(self, position: Position) -> list[Move]:
@@ -154,10 +150,11 @@ class MoveGen:
 
     def _init_attack_sets(self) -> dict[str, dict[int, Bitboard]]:
         attacks = {}
-        attacks["n"] = self.knight_attack_sets()
         attacks["k"] = self.king_attack_sets()
+        attacks["r"] = self.rook_attack_sets()
+        attacks["n"] = self.knight_attack_sets()
         return attacks
-
+    
     def knight_attack_sets(self) -> dict[int, Bitboard]:
         knight_attack = {}
         for s in range(0, 64):
@@ -189,4 +186,22 @@ class MoveGen:
                 (b << 7) & (~H_FILE)
             )
         return king_attack
+    
+    def rook_attack_sets(self) -> dict[int, Bitboard]:
+        rook_attack = {}
+        # Generate occupancy masks for rooks for each square on the board. Not accounting for blockers
+        for s in range(0, 64):
+            b = Bitboard(0)
+            f = s % 8       # file
+            r = (s - f) / 8 # rank
+            for rank in range(0, 8):
+                rank_sq = (rank * 8) + f
+                if not rank_sq == s:
+                    b.set_bit(int(rank_sq))
+            for file in range(0, 8):
+                file_sq = (r * 8) + file
+                if file_sq != s:
+                    b.set_bit(int(file_sq))
+            rook_attack[s] = b
+        return rook_attack
 
