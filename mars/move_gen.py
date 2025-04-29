@@ -24,18 +24,26 @@ class Move:
 
 class MoveGen:
 
-    # { color: { piece: { square: Bitboard } } }
-    attack_sets: dict[str, dict[str, dict[int, Bitboard]]]
+    # { color: { square: Bitboard } }
+    pawn_attacks: dict[str, dict[int, Bitboard]]
+    # { piece: { square: Bitboard } } <-- for knights and kings
+    piece_attack_sets: dict[str, dict[int, Bitboard]]
+
     def __init__(self):
-        self.attack_sets = self.init_attack_sets()
+        self.pawn_attacks = self._init_pawn_attack_sets()
+        self.piece_attack_sets = self._init_attack_sets()
     
     def pseudo_legal_moves(self, position: Position) -> list[Move]:
         move_list = []
 
         # TODO: Maybe combine the knight and king (and other pieces??) into a generic move function with a position, piece_code, and color 
+        # Moves that only depend on origin square
         pawn_list = self.pawn_moves(position)
         king_list = self.king_moves(position)
         knight_list = self.knight_moves(position)
+        # Moves that depend on origin square & "blockers" (bishops + rooks)
+            
+        # Queen moves are calculated as the intersection of rook + bishop moves
 
         move_list.extend(pawn_list)
         move_list.extend(king_list)
@@ -74,7 +82,7 @@ class MoveGen:
         player_pawns = board.piece_bitboard("P" if color == "w" else "p")
         enemy_pieces = board.occupied_by_color(position.opponent)
         for square in get_squares_from_bitboard(player_pawns):
-            attack = self.attack_sets[color]["p"][square] & enemy_pieces
+            attack = self.pawn_attacks[color][square] & enemy_pieces
             for end in get_squares_from_bitboard(attack):
                 if (1 << end) & promotion_rank:
                     for promo in PROMO_PIECES:
@@ -86,7 +94,7 @@ class MoveGen:
         if position.en_passant:
             en_passant_index = algebraic_to_square_index(position.en_passant)
             for square in get_squares_from_bitboard(player_pawns):
-                attack = self.attack_sets[color]["p"][square]
+                attack = self.pawn_attacks[color][square]
                 if attack.get_bit(en_passant_index):
                     moves.append(Move(start=square, end=en_passant_index, en_passant=True))
 
@@ -101,7 +109,7 @@ class MoveGen:
         enemy  = board.occupied_by_color(position.opponent)
         player_knights = board.piece_bitboard("N" if color == "w" else "n")
         for square in get_squares_from_bitboard(player_knights):
-            attack = self.attack_sets[color]["n"][square]
+            attack = self.piece_attack_sets["n"][square]
             for end in get_squares_from_bitboard(attack):
                 if player.get_bit(end): 
                     # Can't move here because a friendly piece is present
@@ -121,7 +129,7 @@ class MoveGen:
         enemy  = board.occupied_by_color(position.opponent)
         player_king = board.piece_bitboard("K" if color == "w" else "k")
         for square in get_squares_from_bitboard(player_king):
-            attack = self.attack_sets[color]["k"][square]
+            attack = self.piece_attack_sets["k"][square]
             for end in get_squares_from_bitboard(attack):
                 if player.get_bit(end): 
                     # Can't move here because a friendly piece is present
@@ -132,25 +140,23 @@ class MoveGen:
                     moves.append(Move(start=square, end=end, capture=True))
         return moves
     
-    def init_attack_sets(self) -> dict[str, dict[str, dict[int, Bitboard]]]:
-        attack = {}
+    def _init_pawn_attack_sets(self) -> dict[str, dict[int, Bitboard]]:
+        pawn_attacks = {}
         for c in VALID_COLORS:
-            attack[c] = {}
-            attack[c]["p"] = self.pawn_attack_sets(color=c)
-            # TODO: Might not need an attack set per color for these
-            attack[c]["k"] = self.king_attack_sets()
-            attack[c]["n"] = self.knight_attack_sets()
-        return attack
-    
-    def pawn_attack_sets(self, color: str) -> dict[int, Bitboard]:
-        pawn_attack = {}
-        for s in range(0, 64):
-            b = np.uint64(1 << s)
-            if color == "w":
-                pawn_attack[s] = Bitboard(((b << 7) & ~H_FILE) | ((b << 9) & ~A_FILE))
-            else:
-                pawn_attack[s] = Bitboard(((b >> 7) & ~A_FILE) | ((b >> 9) & ~H_FILE))
-        return pawn_attack
+            pawn_attacks[c] = {}
+            for s in range(0, 64):
+                b = np.uint64(1 << s)
+                if c == "w":
+                    pawn_attacks[c][s] = Bitboard(((b << 7) & ~H_FILE) | ((b << 9) & ~A_FILE))
+                else:
+                    pawn_attacks[c][s] = Bitboard(((b >> 7) & ~A_FILE) | ((b >> 9) & ~H_FILE))
+        return pawn_attacks
+
+    def _init_attack_sets(self) -> dict[str, dict[int, Bitboard]]:
+        attacks = {}
+        attacks["n"] = self.knight_attack_sets()
+        attacks["k"] = self.king_attack_sets()
+        return attacks
 
     def knight_attack_sets(self) -> dict[int, Bitboard]:
         knight_attack = {}

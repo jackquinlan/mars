@@ -72,3 +72,20 @@ class Board:
             idx -= 16 # reset index to next rank
         return bitboards
     
+    def pprint(self):
+        # Print a "pretty" version of the Board. Useful for debugging.
+        board_str = ""
+        for rank in range(7, -1, -1):
+            row = f"{rank+1} "
+            for file in range(0, 8):
+                square = (rank * 8) + file
+                square_occupied = None 
+                for piece in VALID_PIECES:
+                    if self.bitboards[piece].get_bit(square):
+                        square_occupied = piece 
+                        break
+                row += f"{square_occupied} " if square_occupied else "* "
+            board_str += row.rstrip() + "\n"
+        board_str += "  A B C D E F G H"
+        print(board_str)
+    

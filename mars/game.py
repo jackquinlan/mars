@@ -11,5 +11,6 @@ class Game:
 
     def loop(self):
         moves = self.move_gen.pseudo_legal_moves(position=self.position)
-        print(len(moves), " pseudo legal moves")
+        self.position.board.pprint()
+        print(len(moves), "pseudo legal moves")
 
