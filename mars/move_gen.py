@@ -31,9 +31,10 @@ class MoveGen:
     def __init__(self):
         self.pawn_attacks = self._init_pawn_attack_sets()
         self.piece_attack_sets = self._init_attack_sets()
+        self.piece_attack_sets["b"][25].pprint()
+        self.piece_attack_sets["r"][25].pprint()
+        self.piece_attack_sets["q"][25].pprint()
 
-        self.piece_attack_sets["r"][1].pprint()
-    
     def pseudo_legal_moves(self, position: Position) -> list[Move]:
         move_list = []
 
@@ -153,6 +154,12 @@ class MoveGen:
         attacks["k"] = self.king_attack_sets()
         attacks["r"] = self.rook_attack_sets()
         attacks["n"] = self.knight_attack_sets()
+        attacks["b"] = self.bishop_attack_sets()
+        
+        attacks["q"] = {}
+        for s in range(0, 64):
+            attacks["q"][s] = attacks["r"][s] | attacks["b"][s]
+
         return attacks
     
     def knight_attack_sets(self) -> dict[int, Bitboard]:
@@ -204,4 +211,21 @@ class MoveGen:
                     b.set_bit(int(file_sq))
             rook_attack[s] = b
         return rook_attack
+    
+    def bishop_attack_sets(self) -> dict[int, Bitboard]:
+        bishop_attack = {}
+        # Generate occupancy masks for bishops for each square on the board. Not accounting for blockers
+        for s in range(0, 64):
+            b = Bitboard(0)
+            f = s % 8       # file
+            r = (s - f) / 8 # rank
+            for ray in [(1, 1), (1, -1), (-1, 1), (-1, -1)]:
+                rank = r + ray[0]
+                file = f + ray[1]
+                while 0 <= rank <= 7 and 0 <= file <= 7:
+                    b.set_bit(int((rank * 8) + file))
+                    rank += ray[0]
+                    file += ray[1]
+            bishop_attack[s] = b
+        return bishop_attack
 
